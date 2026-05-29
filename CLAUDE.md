@@ -1,22 +1,34 @@
-# sport-os-infra — Stack Conventions
+# CLAUDE.md — sport-os-infra
+
+## Purpose
+Terraform, Kubernetes, Helm, and GitHub Actions infrastructure for all Sport-OS services.
 
 ## Stack
-- Terraform 1.x for cloud provisioning
-- Docker + docker-compose for local dev / CI builds
-- Kubernetes + Helm 3 for production orchestration
-- GitHub Actions for CI/CD pipelines
+- Terraform 1.x (resource provisioning)
+- Kubernetes + Helm 3 (workload deployment)
+- Docker (container builds)
+- GitHub Actions (CI/CD pipelines per environment)
 
-## Code Conventions
-- Terraform modules in modules/, environments in envs/
-- terraform fmt and terraform validate required before PR
-- Secrets via env vars or Vault — never committed
-- Helm charts in charts/
+## Key Directories
+- `envs/{dev,staging,prod}/` — per-environment Terraform root modules
+- `modules/` — reusable Terraform modules (network, database, cache)
+- `charts/` — Helm charts for backend, ai, docs services
+- `.github/workflows/` — deploy pipelines per environment
 
-## Testing
-- terraform plan diff review mandatory on infra PRs
-- kubectl rollout status smoke check after every deploy
+## Dev Commands
+```bash
+terraform fmt -recursive
+terraform validate
+helm lint charts/<service>
+helm template charts/<service> --debug
+```
 
-## Git
-- Conventional commits (feat:, fix:, infra:)
-- Infra PRs require manual approval gate before apply
-- Remote state backend (S3 or Terraform Cloud)
+## Conventions
+- Remote state in S3/GCS; never commit `.tfstate` to git
+- Pin Terraform provider versions in `versions.tf`
+- One Helm chart per service; values overridden per environment
+- Production deploys require manual approval via GitHub Actions environment
+
+## Related Repos
+- [sport-os-backend](https://github.com/valentinmariusdynu-tech/sport-os-backend) — service image + config
+- [sport-os-ai](https://github.com/valentinmariusdynu-tech/sport-os-ai) — ML service image + config
